@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoJS Basics</title>
+    <script src="../../go.js"></script>
+
+    <script>
+
+        function init() {
+
+            var $ = go.GraphObject.make;
+            myDiagram = $(go.Diagram, "myDiagramDiv", { initialContentAlignment: go.Spot.Center });
+
+            myDiagram.nodeTemplate =
+                $(go.Node, "Auto",
+                    $(go.Shape, "RoundedRectangle",
+                        //Binds the fill property to the color
+                        //function is optional
+                        new go.Binding("fill", "color", function (c) {
+                            //c acts as the source property
+                            if (c == 0) return "red";
+                            if (c == 1) return "blue";
+                        })
+                    ),
+                    $(go.TextBlock, "Node")
+                );
+
+            //nodeTemplateMap
+            myDiagram.nodeTemplateMap.add("SimpleNode",
+                //Define the panel
+                $(go.Node, "Spot",
+                    $(go.Shape, "Rectangle", { fill: "white", desiredSize: new go.Size(100, 20) }),
+                    //nested panel
+                    $(go.Panel, "Auto", { alignment: go.Spot.Left },
+                        $(go.Shape, "Ellipse", { fill: "white" },
+                            new go.Binding("fill", "color", function (color) {
+                                return color == 0 ? "lime" : "cyan"
+                            })
+                        ),
+                        $(go.TextBlock, "SimpleNode",
+                            new go.Binding("text", "key")
+                        )
+                    ),
+                    $(go.Shape, "TriangleUp", { fill: "white", desiredSize: new go.Size(20, 20), alignment: go.Spot.Right })
+                )
+            );
+
+            //groupTemplateMap
+            myDiagram.groupTemplateMap.add("SimpleGroup",
+                $(go.Group, "Vertical",
+                    $(go.TextBlock, "Group"),
+                    $(go.Panel, "Auto",
+                        $(go.Shape, "RoundedRectangle", { fill: "beige" }),
+                        //Placeholder is only used in groups and adornments, can only be one
+                        //It represents the area of all the members of the group
+                        $(go.Placeholder, { padding: 5 })
+                    ),
+                )
+            );
+
+            //linkTempleMap
+            myDiagram.linkTemplateMap.add("SimpleLink",
+                $(go.Link,
+                    //Shaft of the link, usually left default
+                    $(go.Shape),
+                    //Arrowhead pointing to "to"
+                    $(go.Shape, { toArrow: "Standard" }),
+                    //segmentOffset sets the text 10 pixels down form the center or default position
+                    $(go.TextBlock, "Link", { segmentOffset: new go.Point(0, 10) })
+                )
+            );
+
+            myDiagram.model = new go.GraphLinksModel(
+                //Node Data Array
+                [
+                    //If no category is specified, it will use the nodeTemplate with no category
+                    { key: "default", color: 0 },
+                    //If the template can't process the value, it will provide a default one
+                    { key: "default2", color: 42 },
+                    { key: "Alpha", category: "SimpleNode" },
+                    { key: "Beta", isGroup: true, category: "SimpleGroup" },
+                    { key: "Gamma", group: "Beta", category: "SimpleNode", color: 0 },
+                    { key: "Delta", group: "Beta", category: "SimpleNode", color: 1 }
+                ],
+                //Link Data Array
+                [
+                    { to: "Beta", from: "Alpha", category: "SimpleLink" }
+                ]
+            )
+        }
+
+    </script>
+
+</head>
+
+<body onload="init()">
+    <div id="myDiagramDiv" style="height: 400px; width: 1000px; border: 1px solid black;"></div>
+</body>
+
+</html>
