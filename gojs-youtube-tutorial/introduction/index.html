@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoJS Introduction</title>
+    <!--Get the go library locally, can also use a CDN link-->
+    <script src="../../go.js"></script>
+
+    <script>
+
+        function init() {
+
+            //Save the function to build GoJS objects in a variable
+            var $ = go.GraphObject.make;
+
+            //call function with params go.Diagram and the ID of the Div associated with the diagram
+            myDiagram = $(go.Diagram, "myDiagramDiv",
+                //Enable ctrl+z and ctrl+y to undo and redo
+                { "undoManager.isEnabled": true }
+            );
+
+            //Array containing the elements of the diagram, identified by the 'key' property
+            var nodeDataArray = [
+                { key: "Alpha", color: "lime" },
+                { key: "Beta", color: "cyan" },
+                //Create a group, in which every element is treated as one node
+                { key: "Zeta", isGroup: true },
+                { key: "Delta", color: "pink", group: "Zeta" },
+                { key: "Gamma", color: "maroon", group: "Zeta" }
+            ];
+
+            //Array of the links in the diagram, with properties indicating 'to' and 'from' which node goes the link
+            var linkDataArray = [
+                { to: "Beta", from: "Alpha", color: "red" },
+                { from: "Alpha", to: "Zeta" }
+            ];
+
+            //Set diagrams model using nodes and links arrays
+            myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
+
+            //Define node style using templates
+            myDiagram.nodeTemplate = 
+                //First param is go.Node, second param is the type of panel used
+                $(go.Node, "Auto",
+                    //Define the shape of the node/panel
+                    $(go.Shape, "RoundedRectangle", { fill: "white" },
+                        //Bind the color of the node from nodeDataArray to the fill property
+                        new go.Binding("fill", "color")
+                    ),
+                    //Define the TextBlock of the node/panel
+                    //This will be the displayed text in the nodes
+                    $(go.TextBlock, "text", { margin: 10 },
+                        //Bind the key of the node to the text property
+                        new go.Binding("text", "key")
+                    )
+                );
+
+            //Define link style using templates
+            myDiagram.linkTemplate = 
+                $(go.Link,
+                    //Define the shape of the link and the width
+                    $(go.Shape, { strokeWidth: 3 },
+                        new go.Binding("stroke", "color")
+                    ),
+                    //Define the shape of the arrow, stroke: null removes border around the arrow head
+                    $(go.Shape, { toArrow: "Standard", stroke: null },
+                        new go.Binding("fill", "color")
+                    )
+                );
+        }
+
+    </script>
+
+</head>
+<body onload="init()">
+    <!--Set the style for the diagram from the div element-->
+    <div id="myDiagramDiv" style="width:300px; height: 300px; border: 1px solid black;"></div>
+</body>
+</html>
