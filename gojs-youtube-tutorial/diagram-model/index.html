@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoJS Basics</title>
+    <script src="../../go.js"></script>
+
+    <script>
+
+        function init() {
+            var $ = go.GraphObject.make;
+            myDiagram = $(go.Diagram, "myDiagramDiv");
+
+            //Templates are explored more in deep in another file
+            myDiagram.nodeTemplate =
+                $(go.Node, "Auto",
+                    $(go.Shape, "RoundedRectangle", { strokeWidth: 0 },
+                        new go.Binding("fill", "color")
+                    ),
+                    $(go.TextBlock,
+                        { margin: 8 },
+                        new go.Binding("text", "key"))
+                );
+
+            //This is a default model, only uses nodeDataArray
+            //only the last model applies
+            myDiagram.model = $(go.Model,
+                {
+                    nodeDataArray:
+                        [
+                            { key: "Alpha", color: "orange" },
+                            { key: "beta", color: "lime" }
+                        ]
+                }
+            );
+
+            //This is a GraphLinksModel, uses nodeDataArray and linkDataArray
+            myDiagram.model = new go.GraphLinksModel(
+                [
+                    { key: "Alpha", color: "orange" },
+                    { key: "Beta", color: "lime" }
+                ],
+                [
+                    { to: "Beta", from: "Alpha" }
+                ]
+            );
+
+            //This is a treeModel, uses nodeDataArray and parent property
+            myDiagram.model = new go.TreeModel(
+                [
+                    { key: "Alpha", color: "orange" },
+                    { key: "Beta", color: "lime", parent: "Alpha" },
+                    { key: "Delta", color: "pink", parent: "Alpha" },
+                    { key: "Gamma", color: "cyan", parent: "Alpha" }
+                ],
+            );
+
+            //Add a new node to the model
+            var data = { key: "Zeta", color: "beige" };
+            myDiagram.model.addNodeData(data);
+
+            //Update a property
+            var dataObj = myDiagram.model.findNodeDataForKey("Zeta");
+            myDiagram.model.set(dataObj, "color", "red")
+            file = myDiagram.model.toJson();
+
+        }
+
+        //Save and load model from and to a json string
+        function save() {
+            file = myDiagram.model.toJson();
+        }
+
+        function load() {
+            myDiagram.model = go.Model.fromJson(file);
+        }
+
+    </script>
+
+</head>
+
+<body onload="init()">
+    <div id="myDiagramDiv" style="height: 400px; width: 400px; border: 1px solid black;"></div>
+    <button onclick="save()">Save</button>
+    <button onclick="load()">Load</button>
+</body>
+
+</html>
