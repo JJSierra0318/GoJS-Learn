@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoJS Basics</title>
+    <script src="../../go.js"></script>
+
+    <script>
+
+        function init() {
+            var $ = go.GraphObject.make;
+
+            myDiagram = $(go.Diagram, "myDiagramDiv")
+
+            myDiagram.add(
+                $(go.Part, "Position",
+                    $(go.Shape, "RoundedRectangle", { fill: "white", position: new go.Point(-50, 20) }),
+                    $(go.TextBlock, "Position panel", { position: new go.Point(50, 20) })
+                )
+            );
+
+            myDiagram.add(
+                $(go.Part, "Vertical",
+                    $(go.Shape, "RoundedRectangle", { fill: "white" }),
+                    $(go.TextBlock, "Vertical panel",
+                    {
+                        background: "lightgray",
+                        //aligns the textBox
+                        alignment: go.Spot.Right,
+                        //make textbox occupy all the available space
+                        stretch: go.GraphObject.Fill,
+                        //aligns the text
+                        textAlign: "right"
+                    })
+                )
+            );
+
+            myDiagram.add(
+                $(go.Part, "Horizontal",
+                    $(go.Shape, "RoundedRectangle", { fill: "white" }),
+                    $(go.TextBlock, "Horizontal panel",
+                    {
+                        background: "lightgray",
+                        alignment: go.Spot.Bottom,
+                        stretch: go.GraphObject.Fill,
+                        textAlign: "bottom"
+                    })
+                )
+            );
+
+            myDiagram.add(
+                $(go.Part, "Spot",
+                    //Shape will be the main panel by default
+                    $(go.Shape, "RoundedRectangle", { fill: "white" }),
+                    $(go.TextBlock, "Spot panel",
+                    {
+                        //text will be positioned at 1, 0.5 with 20 pixels to the left
+                        alignment: new go.Spot(1, 0.5, -20, 0),
+                        alignmentFocus: go.Spot.TopLeft
+                    })
+                )
+            );
+
+            myDiagram.add(
+                $(go.Part, "Auto",
+                    //Shape will be the main panel by default
+                    $(go.Shape, "RoundedRectangle", { fill: "white" }),
+                    $(go.TextBlock, "Auto panel")
+                )
+            );
+
+        }
+
+    </script>
+
+</head>
+<body onload="init()">
+    <div id="myDiagramDiv" style="height: 400px; width: 1000px; border: 1px solid black;"></div>
+</body>
+</html>

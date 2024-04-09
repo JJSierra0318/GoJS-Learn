@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoJS Basics</title>
+    <script src="../../go.js"></script>
+
+    <script>
+
+        function init() {
+            //First argument of GraphObject.make is the object type, followed by optional properties and optional key/value pairs
+            //for properties
+            var $ = go.GraphObject.make;
+
+            //Creates an empty diagram
+            myDiagram = $(go.Diagram, "myDiagramDiv")
+
+            //The model contains the element which will be visualized via the diagram
+            myDiagram.model = $(go.GraphLinksModel);
+            myDiagram.model.nodeDataArray = 
+            [
+                { key: "Alpha" },
+                { key: "Beta" },
+                { key: "Gamma" },
+                { key: "Delta" },
+                { key: "Epsilon" }
+            ];
+
+            myDiagram.model.linkDataArray = 
+            [
+                { to: "Beta", from: "Alpha" }
+            ];
+
+            //Arrange the nodes in a layout
+            myDiagram.layout = $(go.CircularLayout);
+        }
+
+    </script>
+
+</head>
+<body onload="init()">
+    <div id="myDiagramDiv" style="height: 400px; width: 400px; border: 1px solid black;"></div>
+</body>
+</html>
