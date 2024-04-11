@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoJS Basics</title>
+    <script src="../../go.js"></script>
+
+    <script>
+
+        function init() {
+
+            var $ = go.GraphObject.make;
+            myDiagram = $(go.Diagram, "myDiagramDiv", { initialContentAlignment: go.Spot.Center });
+
+            myDiagram.nodeTemplate =
+                $(go.Node, "Vertical",
+                    {
+                        selectable: true,
+                        deletable: false,
+                        resizable: true,
+                        rotatable: true,
+                        //Only this object will be resized or rotated
+                        resizeObjectName: "PANEL",
+                        rotateObjectName: "PANEL"
+                    },
+                    $(go.TextBlock, "text",
+                        //properties for the TextBlock object
+                        {
+                            text: "Example",
+                            font: "Italic small-caps bold 12pt Georgia, Serif",
+                            stroke: "purple",
+                            editable: true
+                        }
+                    ),
+                    //Set a name as a sort of ID for the resize object property
+                    $(go.Panel, "Auto", { name: "PANEL" },
+                        $(go.Shape, "RoundedRectangle",
+                            //propertires take priority over defaults, so the shape will be an ellipse instead of a rounded rectangle
+                            {
+                                figure: "Ellipse",
+                                fill: "pink",
+                                stroke: "purple",
+                                strokeWidth: 10
+                            }
+                        ),
+                        //Default parameter for a picture is the source
+                        $(go.Picture, "http://placebear.com/300/200",
+                            {
+                                desiredSize: new go.Size(150, 100),
+                                margin: new go.Margin(25, 0, 0, 0)
+                            }
+                        )
+                    )
+                );
+
+
+            myDiagram.model = new go.GraphLinksModel(
+                //Node Data Array
+                [
+                    { key: "Alpha", category: "SimpleNode" },
+                ],
+            )
+        }
+
+    </script>
+
+</head>
+
+<body onload="init()">
+    <div id="myDiagramDiv" style="height: 400px; width: 1000px; border: 1px solid black;"></div>
+</body>
+
+</html>
