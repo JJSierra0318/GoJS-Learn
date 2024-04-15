@@ -1,0 +1,5 @@
+<!--To use gojs-diagram, the GojsAngularModule must be imported and used on app.module.ts-->
+<gojs-diagram [divClassName]='diagramDivClassName' [initDiagram]='initDiagram' [nodeDataArray]='state.diagramNodeData'
+  [linkDataArray]='state.diagramLinkData' [modelData]='state.diagramModelData' [skipsDiagramUpdate]='state.skipsDiagramUpdate' (modelChange)='diagramModelChange($event)'></gojs-diagram>
+
+<gojs-palette [divClassName]='paletteDivClassName' [initPalette]='initPalette' [nodeDataArray]='state.paletteNodeData'></gojs-palette>
