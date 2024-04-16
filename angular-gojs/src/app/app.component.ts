@@ -1,7 +1,7 @@
-import { ViewEncapsulation } from '@angular/core';
-import { Component } from '@angular/core';
+import { ViewEncapsulation, ViewChild, Component, ChangeDetectorRef } from '@angular/core';
 import * as go from 'gojs';
 import { DataSyncService, DiagramComponent, PaletteComponent } from 'gojs-angular';
+import produce from "immer";
 
 @Component({
   selector: 'app-root',
@@ -10,6 +10,12 @@ import { DataSyncService, DiagramComponent, PaletteComponent } from 'gojs-angula
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
+
+  //Save the reference of the element with id 'myDiagram' for use after initialization
+  @ViewChild('myDiagram', { static: true }) public myDiagramComponent!: DiagramComponent;
+
+  // inform Angular to detect changes after initialization
+  constructor(private cdr: ChangeDetectorRef) { }
 
   // initialize diagram and templates
   public initDiagram(): go.Diagram {
@@ -58,7 +64,13 @@ export class AppComponent {
         $(go.TextBlock, { margin: 8 },
           new go.Binding('text', 'key'))
       );
-    
+
+    palette.model = new go.GraphLinksModel(
+      {
+        linkKeyProperty: 'key'
+      }
+    )
+
     return palette
   }
 
@@ -67,13 +79,19 @@ export class AppComponent {
 
     // node data array
     diagramNodeData: [
-      { id: 'Alpha', text: 'Alpha', color: 'lightblue' },
-      { id: 'Beta', text: "Beta", color: 'orange' }
+      { id: 'Alpha', text: "Alpha", color: 'lightblue' },
+      { id: 'Beta', text: "Beta", color: 'orange' },
+      { id: 'Gamma', text: "Gamma", color: 'lightgreen' },
+      { id: 'Delta', text: "Delta", color: 'pink' }
     ],
 
     // link data array
     diagramLinkData: [
-      { key: -1, from: 'Alpha', to: 'Beta' }
+      { key: -1, from: 'Alpha', to: 'Beta' },
+      { key: -2, from: 'Alpha', to: 'Gamma' },
+      { key: -3, from: 'Beta', to: 'Beta' },
+      { key: -4, from: 'Gamma', to: 'Delta' },
+      { key: -5, from: 'Delta', to: 'Alpha' }
     ],
 
     // modelData defines custom proerties for the model itself
@@ -94,7 +112,19 @@ export class AppComponent {
   public paletteDivClassName = 'myPaletteDiv';
 
   // handles model changes
-  public diagramModelChange = function(changes: go.IncrementalData) {
+  public diagramModelChange = function (changes: go.IncrementalData) {
     console.log(changes)
   }
+
+  // function to reinitialize the model
+  public reinitModel() {
+    // clears the diagram
+    this.myDiagramComponent.clear();
+    // sets values for the newly initialized diagram
+    this.state = produce(this.state, draft => {
+        draft.skipsDiagramUpdate = false;
+        draft.diagramNodeData = [{ id: "Alpha", text: "Zorro", color: "red" }];
+        draft.diagramLinkData = [];
+    });
+}
 }
