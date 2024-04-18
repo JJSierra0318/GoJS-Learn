@@ -51,7 +51,9 @@ export class AppComponent {
       // create the model
       model: $(go.GraphLinksModel,
         {
-
+          linkToPortIdProperty: 'toPort',
+          linkFromPortIdProperty: 'fromPort',
+          // must be defined for merges and data sync
           linkKeyProperty: 'key'
         }
       )
