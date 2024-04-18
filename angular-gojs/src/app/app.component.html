@@ -1,9 +1,22 @@
 <!--To use gojs-diagram, the GojsAngularModule must be imported and used on app.module.ts-->
-<gojs-diagram #myDiagram [divClassName]='diagramDivClassName' [initDiagram]='initDiagram' [nodeDataArray]='state.diagramNodeData'
-  [linkDataArray]='state.diagramLinkData' [modelData]='state.diagramModelData'
-  [skipsDiagramUpdate]='state.skipsDiagramUpdate' (modelChange)='diagramModelChange($event)'>
-</gojs-diagram>
-<button (click)='reinitModel()'>Reset Diagram</button>
 
-<gojs-palette [divClassName]='paletteDivClassName' [initPalette]='initPalette'
-  [nodeDataArray]='state.paletteNodeData'></gojs-palette>
+<h1>GoJS / Angular</h1>
+
+<div class="left">PALETTE
+  <gojs-palette [divClassName]='paletteDivClassName' [initPalette]='initPalette'
+    [nodeDataArray]='state.paletteNodeData'></gojs-palette>
+</div>
+
+<div class="left">DIAGRAM
+  <gojs-diagram #myDiagram [divClassName]='diagramDivClassName' [initDiagram]='initDiagram'
+    [nodeDataArray]='state.diagramNodeData' [linkDataArray]='state.diagramLinkData' [modelData]='state.diagramModelData'
+    [skipsDiagramUpdate]='state.skipsDiagramUpdate' (modelChange)='diagramModelChange($event)'>
+  </gojs-diagram>
+  <button (click)='reinitModel()'>Reset Diagram</button>
+</div>
+
+<div class="left">OVERVIEW
+  <gojs-overview [divClassName]='overviewDivClassName' [initOverview]='initOverview'
+    [observedDiagram]='observedDiagram'>
+  </gojs-overview>
+</div>
