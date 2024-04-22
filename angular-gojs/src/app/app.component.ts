@@ -1,12 +1,13 @@
 import { ViewEncapsulation, ViewChild, Component, ChangeDetectorRef } from '@angular/core';
 import * as go from 'gojs';
-import { DataSyncService, DiagramComponent, PaletteComponent } from 'gojs-angular';
+import { DataSyncService, DiagramComponent } from 'gojs-angular';
 import produce from "immer";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  // the styling will be inherited to all components
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
@@ -108,7 +109,7 @@ export class AppComponent {
         makePort('b', go.Spot.BottomCenter)
       );
 
-    return diagram
+    return diagram;
   }
 
   // palette holds default nodes which can be dragged to another diagram
@@ -128,11 +129,11 @@ export class AppComponent {
 
     palette.model = new go.GraphLinksModel(
       {
-        linkKeyProperty: 'key'
+        linkKeyProperty: 'key',
       }
-    )
+    );
 
-    return palette
+    return palette;
   }
 
   // object that holds the state of the diagram elements
@@ -144,7 +145,7 @@ export class AppComponent {
     // link data array
     diagramLinkData: this.initialLinks,
 
-    // modelData defines custom proerties for the model itself
+    // modelData defines custom properties for the model itself
     diagramModelData: { prop: 'value' } as go.ObjectData,
 
     // should the component skip updating? often used when updating state from modelChange
@@ -156,7 +157,7 @@ export class AppComponent {
     // node data for palette
     paletteNodeData: [
       { key: 'Epsilon', text: 'Epsilon', color: 'red' },
-      { key: 'Kappa', text: 'Kappa', color: 'purple' }
+      { key: 'Kappa', text: 'Kappa', color: 'purple' },
     ],
 
     // flag to know if an update is made from the inspector
@@ -175,11 +176,10 @@ export class AppComponent {
     if (this.state.updateFromInspector) {
       this.state = {
         ...this.state,
-        updateFromInspector: false
+        updateFromInspector: false,
       }
-      return
+      return;
     }
-    console.log(changes);
     
     // update the inspector data if the specific node is changed
     // get the list of modified nodes
@@ -197,8 +197,8 @@ export class AppComponent {
             selectedNodeData: modifiedNode,
           }
         }
-      }
-    }
+      };
+    };
 
     this.state = {
       ...this.state,
@@ -266,8 +266,6 @@ export class AppComponent {
 
   // handle when a change is made on the Inspector
   public handleInspectorChange(changedData: any) {
-    console.log(changedData);
-
     // prop is the parameter that changed, for example 'text', 'color' or 'loc'
     const prop = changedData.prop;
     // the new value this parameter will have
