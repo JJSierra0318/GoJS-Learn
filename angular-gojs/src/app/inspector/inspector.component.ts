@@ -10,15 +10,15 @@ import * as go from 'gojs';
 export class InspectorComponent {
 
   @Input()
-  public nodeData: go.ObjectData;
+  public nodeData: go.ObjectData | undefined;
 
   @Output()
   public onInspectorChange: EventEmitter<any> = new EventEmitter<any>();
 
   constructor() { }
 
-  public onInputChange(propAndValObj: any) {
-    this.onInspectorChange.emit(propAndValObj);
+  public onInputChange(e: any, prop: any) {
+    this.onInspectorChange.emit({prop, value: e.target.value});
   }
 
 }

@@ -12,6 +12,9 @@ import produce from "immer";
 export class AppComponent {
 
   // initial set of nodes
+  // for the diagramModelChange function to work correctly, the key property must be defined like so,
+  // defining it as any other thing, such as 'id', and then setting the 'nodeKeyProperty' to 'id', (while
+  // being a supposedly correct action) will make the function fail
   initialNodes: go.ObjectData[] = [
     { key: 'Alpha', text: "Alpha", color: 'lightblue', loc: '0 0' },
     { key: 'Beta', text: "Beta", color: 'orange', loc: '100 0' },
@@ -20,7 +23,7 @@ export class AppComponent {
   ];
 
   // initial set of links
-  initialLinks = [
+  initialLinks: go.ObjectData[] = [
     // fromPort and toPort indicate from and to which port the link goes
     // the port is created in the makePort and the values are assigned in the diagram.nodeTemplate
     { key: -1, from: 'Alpha', to: 'Beta', fromPort: 'r', toPort: '1' },
@@ -63,7 +66,7 @@ export class AppComponent {
     diagram.commandHandler.archetypeGroupData = { key: 'Group', isGroup: true };
 
     // create a port in a node for links
-    const makePort = function(id: string, spot: go.Spot) {
+    const makePort = function (id: string, spot: go.Spot) {
       return $(go.Shape, 'Circle',
         {
           opacity: .5,
@@ -142,19 +145,22 @@ export class AppComponent {
     diagramLinkData: this.initialLinks,
 
     // modelData defines custom proerties for the model itself
-    diagramModelData: { prop: 'value' },
+    diagramModelData: { prop: 'value' } as go.ObjectData,
 
     // should the component skip updating? often used when updating state from modelChange
     skipsDiagramUpdate: false,
 
     // used by InspectorComponent
-    //selectedNodeData: null,
+    selectedNodeData: {} as go.ObjectData,
 
     // node data for palette
     paletteNodeData: [
       { key: 'Epsilon', text: 'Epsilon', color: 'red' },
       { key: 'Kappa', text: 'Kappa', color: 'purple' }
     ],
+
+    // flag to know if an update is made from the inspector
+    updateFromInspector: false,
   }
 
   // sets the class name with the CSS linked to it for the gojs-diagram html tag
@@ -163,14 +169,46 @@ export class AppComponent {
 
   // handles model changes made from the view and updates the state
   public diagramModelChange = (changes: go.IncrementalData) => {
-    if(!changes) return
-    console.log(this.state.diagramNodeData);
+    // if there are no changes return
+    if (!changes) return;
+    // skip if the change was made from the inspector component
+    if (this.state.updateFromInspector) {
+      this.state = {
+        ...this.state,
+        updateFromInspector: false
+      }
+      return
+    }
+    console.log(changes);
     
+    // update the inspector data if the specific node is changed
+    // get the list of modified nodes
+    const modifiedNodeData = changes.modifiedNodeData;
+    // check if there are any modified nodes and if there is a selected node
+    // get the property name used to identify the node (key by default)
+    const nodeKeyProperty = this.myDiagramComponent.diagram.model.nodeKeyProperty as string;
+    if (modifiedNodeData && this.state.selectedNodeData) {
+      // iterate over the modified nodes until the selected node is found
+      for (let i = 0; i < modifiedNodeData.length; i++) {
+        const modifiedNode = modifiedNodeData[i];
+        if (modifiedNode[nodeKeyProperty] === this.state.selectedNodeData[nodeKeyProperty]) {
+          this.state = {
+            ...this.state,
+            selectedNodeData: modifiedNode,
+          }
+        }
+      }
+    }
+
     this.state = {
       ...this.state,
+      // set to true as the update has already been made, this function just updates the state with the changes made
       skipsDiagramUpdate: true,
-      diagramNodeData: DataSyncService.syncNodeData(changes, this.state.diagramNodeData)
-    }  
+      // updates state data
+      diagramNodeData: DataSyncService.syncNodeData(changes, this.state.diagramNodeData),
+      diagramLinkData: DataSyncService.syncLinkData(changes, this.state.diagramLinkData),
+      diagramModelData: DataSyncService.syncModelData(changes, this.state.diagramModelData),
+    }
   };
 
   // function to reinitialize the model
@@ -186,7 +224,7 @@ export class AppComponent {
   }
 
   // defining properties for the Overview component
-  public overviewDivClassName = 'myOverviewDiv'
+  public overviewDivClassName = 'myOverviewDiv';
 
   // function required to initialize overview component
   public initOverview(): go.Overview {
@@ -199,8 +237,52 @@ export class AppComponent {
   public ngAfterViewInit() {
     if (this.observedDiagram) return;
 
+    // set the observedDiagram to the initialized diagram
     this.observedDiagram = this.myDiagramComponent.diagram;
-
+    // without this, Angular will throw ExpressionChangedAfterItHasBeenCheckedError
     this.cdr.detectChanges();
+
+    // listener for when a node is selected
+    this.myDiagramComponent.diagram.addDiagramListener('ChangedSelection', e => {
+      // check if a node is selected, if not set an empty object
+      if (e.diagram.selection.count === 0) this.state = {
+        ...this.state,
+        selectedNodeData: {}
+      }
+      // the selected node will be the first one in the list
+      const selectedNode = e.diagram.selection.first();
+      // update the state with the newly selected node
+      this.state = produce(this.state, draft => {
+        // check if the selection is a node
+        if (selectedNode instanceof go.Node) {
+          const idSelectedNode = draft.diagramNodeData.findIndex(node => node['key'] == selectedNode.data.key);
+          draft.selectedNodeData = draft.diagramNodeData[idSelectedNode];
+        } else {
+          draft.selectedNodeData = {};
+        }
+      })
+    })
+  }
+
+  // handle when a change is made on the Inspector
+  public handleInspectorChange(changedData: any) {
+    console.log(changedData);
+
+    // prop is the parameter that changed, for example 'text', 'color' or 'loc'
+    const prop = changedData.prop;
+    // the new value this parameter will have
+    const value = changedData.value;
+
+    this.state = produce(this.state, draft => {
+      draft.updateFromInspector = true;
+      var data = draft.selectedNodeData;
+      data[prop] = value;
+      const key = data['key'];
+      const idx = draft.diagramNodeData.findIndex(nd => nd['key'] == key);
+      if (idx >= 0) {
+        draft.diagramNodeData[idx] = data;
+        draft.skipsDiagramUpdate = false // we need to sync GoJS data with this new app state, so do not skips Diagram update
+      }
+    });
   }
 }

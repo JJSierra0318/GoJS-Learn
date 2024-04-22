@@ -20,3 +20,25 @@
     [observedDiagram]='observedDiagram'>
   </gojs-overview>
 </div>
+
+<div class="left">INSPECTOR
+  <app-inspector [nodeData]='state.selectedNodeData' (onInspectorChange)='handleInspectorChange($event)'></app-inspector>
+</div>
+
+<div class="clear left box">
+  <h3>Nodes in app data</h3>
+  <ul>
+    <li *ngFor="let node of state.diagramNodeData">
+      Node ID: {{node['key']}}, Text: {{node['text']}}, Color: {{node['color']}}, Loc: {{node['loc']}}
+    </li>
+  </ul>
+</div>
+
+<div class="left box">
+  <h3>Links in app data</h3>
+  <ul>
+    <li *ngFor="let link of state.diagramLinkData">
+      Link ID: {{link['key']}}, To: {{link['to']}}, From: {{link['from']}}
+    </li> 
+  </ul>
+</div>
