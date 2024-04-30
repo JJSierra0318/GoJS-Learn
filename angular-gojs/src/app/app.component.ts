@@ -109,6 +109,11 @@ export class AppComponent {
         makePort('b', go.Spot.BottomCenter)
       );
 
+    // stablish the layout
+    // go.CircularLayout
+    const layout = new go.GridLayout(); // Use the desired layout type
+    diagram.layout = layout;
+
     return diagram;
   }
 
@@ -180,7 +185,7 @@ export class AppComponent {
       }
       return;
     }
-    
+
     // update the inspector data if the specific node is changed
     // get the list of modified nodes
     const modifiedNodeData = changes.modifiedNodeData;
